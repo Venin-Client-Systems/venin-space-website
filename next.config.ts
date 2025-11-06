@@ -19,16 +19,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Serve static HTML at /excisemate
-  async rewrites() {
-    return [
-      {
-        source: '/excisemate',
-        destination: '/excisemate.html',
-      },
-    ];
-  },
-
   // Security headers
   async headers() {
     return [
