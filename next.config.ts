@@ -8,6 +8,20 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   compress: true,
 
+  // Rewrites to serve static HTML marketing page
+  async rewrites() {
+    return [
+      {
+        source: '/',
+        destination: '/excisemate.html',
+      },
+      {
+        source: '/excisemate',
+        destination: '/excisemate.html',
+      },
+    ];
+  },
+
   // Security headers
   async headers() {
     return [
