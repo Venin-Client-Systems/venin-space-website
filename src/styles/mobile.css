@@ -1,0 +1,463 @@
+/* Mobile-first responsive styles for ExciseMate */
+
+/* Safe area support for iOS devices */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-area-left {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+
+  .safe-area-right {
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+/* Touch-friendly interactions */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* Better touch scrolling */
+.smooth-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+/* Mobile-optimized focus states */
+.mobile-focus:focus {
+  outline: none;
+}
+
+.mobile-focus:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Mobile card animations */
+.mobile-card-hover {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.mobile-card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-card-hover:active {
+  transform: translateY(0);
+  transition: transform 0.05s ease-out;
+}
+
+/* Mobile button styles */
+.mobile-button {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+  transition: all 0.15s ease-out;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-button:active {
+  transform: scale(0.98);
+}
+
+/* Mobile typography */
+.mobile-title {
+  @apply text-lg font-bold;
+  line-height: 1.3;
+}
+
+.mobile-subtitle {
+  @apply text-sm text-muted-foreground;
+  line-height: 1.4;
+}
+
+.mobile-body {
+  @apply text-sm;
+  line-height: 1.5;
+}
+
+.mobile-caption {
+  @apply text-xs text-muted-foreground;
+  line-height: 1.4;
+}
+
+/* Mobile layout utilities */
+.mobile-container {
+  @apply px-4 mx-auto;
+  max-width: 100vw;
+}
+
+.mobile-section {
+  @apply space-y-4 py-4;
+}
+
+.mobile-card {
+  @apply rounded-lg border border-border bg-card shadow-sm;
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.mobile-grid-1 {
+  @apply grid grid-cols-1 gap-4;
+}
+
+.mobile-grid-2 {
+  @apply grid grid-cols-2 gap-3;
+}
+
+/* Mobile navigation */
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+  transition: colors 0.15s ease-out;
+}
+
+.mobile-nav-item:hover {
+  @apply bg-accent text-accent-foreground;
+}
+
+.mobile-nav-item.active {
+  @apply bg-primary text-primary-foreground;
+}
+
+/* Mobile bottom navigation */
+.mobile-bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 z-40;
+  @apply bg-background border-t border-border;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.mobile-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+  transition: colors 0.15s ease-out;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.mobile-bottom-nav-item:hover {
+  @apply text-foreground bg-accent;
+}
+
+.mobile-bottom-nav-item.active {
+  @apply text-primary;
+}
+
+/* Mobile header */
+.mobile-header {
+  @apply sticky top-0 z-30;
+  @apply bg-background bg-opacity-80 backdrop-blur-sm;
+  @apply border-b border-border;
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+/* Mobile sheet/drawer */
+.mobile-sheet-content {
+  @apply w-80 p-0 overflow-y-auto;
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+/* Mobile table alternatives */
+.mobile-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+  transition: colors 0.15s ease-out;
+}
+
+.mobile-list-item:last-child {
+  border-bottom: none;
+}
+
+.mobile-list-item:hover {
+  @apply bg-accent bg-opacity-50;
+}
+
+.mobile-list-item:active {
+  @apply bg-accent;
+}
+
+/* Mobile form styles */
+.mobile-form-group {
+  @apply space-y-2;
+}
+
+.mobile-form-actions {
+  @apply flex flex-col-reverse sm:flex-row;
+  @apply sm:justify-end sm:space-x-2;
+  @apply space-y-2 space-y-reverse sm:space-y-0;
+}
+
+.mobile-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem; /* Prevent zoom on iOS */
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* Mobile modals and dialogs */
+.mobile-modal {
+  @apply max-h-[90vh] overflow-y-auto;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.mobile-modal-header {
+  @apply sticky top-0 bg-background;
+  @apply border-b border-border;
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+/* Mobile loading states */
+.mobile-skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+.mobile-spinner {
+  @apply animate-spin rounded-full;
+  @apply border-2 border-muted border-t-primary;
+}
+
+/* Mobile error states */
+.mobile-error {
+  @apply p-4 rounded-lg;
+  @apply bg-red-50 border border-red-200;
+  @apply text-red-700;
+}
+
+.mobile-warning {
+  @apply p-4 rounded-lg;
+  @apply bg-yellow-50 border border-yellow-200;
+  @apply text-yellow-700;
+}
+
+/* Mobile success states */
+.mobile-success {
+  @apply p-4 rounded-lg;
+  @apply bg-green-50 border border-green-200;
+  @apply text-green-700;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .mobile-card-hover:hover {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-card-hover,
+  .mobile-button,
+  .mobile-nav-item,
+  .mobile-bottom-nav-item,
+  .mobile-list-item {
+    transition: none;
+  }
+
+  .mobile-card-hover:active,
+  .mobile-button:active {
+    transform: none;
+  }
+
+  .mobile-spinner {
+    animation: none;
+  }
+
+  .mobile-skeleton {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mobile-card {
+    @apply border-2;
+  }
+
+  .mobile-nav-item.active {
+    @apply border-2 border-primary;
+  }
+
+  .mobile-bottom-nav-item.active {
+    @apply border-t-2 border-primary;
+  }
+}
+
+/* Print styles */
+@media print {
+  .mobile-bottom-nav,
+  .mobile-header,
+  .mobile-nav-item,
+  .mobile-button {
+    display: none !important;
+  }
+
+  .mobile-card {
+    @apply border border-black;
+    box-shadow: none;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .mobile-header {
+    @apply py-2;
+  }
+
+  .mobile-bottom-nav {
+    @apply py-1;
+  }
+
+  .mobile-section {
+    @apply py-2;
+  }
+}
+
+/* Large mobile devices */
+@media screen and (min-width: 375px) and (max-width: 767px) {
+  .mobile-container {
+    @apply px-6;
+  }
+
+  .mobile-grid-2 {
+    @apply gap-4;
+  }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 374px) {
+  .mobile-container {
+    @apply px-3;
+  }
+
+  .mobile-grid-2 {
+    @apply gap-2;
+  }
+
+  .mobile-nav-item {
+    @apply p-2;
+  }
+
+  .mobile-list-item {
+    @apply p-3;
+  }
+}
+
+/* iOS specific fixes */
+.ios-fix {
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
+}
+
+/* Android specific fixes */
+.android-fix {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  .mobile-header {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Utilities for JavaScript */
+.js-mobile-menu-open {
+  overflow: hidden;
+}
+
+.js-mobile-sheet-open {
+  overflow: hidden;
+}
+
+/* Animation classes */
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.fade-out {
+  animation: fadeOut 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

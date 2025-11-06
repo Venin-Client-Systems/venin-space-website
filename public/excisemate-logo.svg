@@ -1,0 +1,18 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer triangle -->
+  <path d="M60 10 L110 100 L10 100 Z" stroke="currentColor" stroke-width="8" fill="none"/>
+
+  <!-- Inner triangle -->
+  <path d="M60 30 L85 75 L35 75 Z" fill="currentColor" opacity="0.3"/>
+
+  <!-- Distillery flask/vessel -->
+  <g transform="translate(60, 55)">
+    <!-- Flask neck -->
+    <rect x="-8" y="-25" width="16" height="15" fill="currentColor"/>
+    <!-- Flask body -->
+    <path d="M -15 -10 Q -15 15, -8 25 L 8 25 Q 15 15, 15 -10 Z" fill="currentColor"/>
+    <!-- Flask details -->
+    <circle cx="0" cy="5" r="3" fill="white" opacity="0.3"/>
+    <circle cx="0" cy="15" r="2" fill="white" opacity="0.3"/>
+  </g>
+</svg>

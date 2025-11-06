@@ -8,9 +8,15 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   compress: true,
 
-  // No redirects for now
+  // Redirect root to /excisemate
   async redirects() {
-    return [];
+    return [
+      {
+        source: '/',
+        destination: '/excisemate',
+        permanent: true,
+      },
+    ];
   },
 
   // Security headers

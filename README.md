@@ -1,157 +1,77 @@
-# ExciseMate Marketing Site
+# Venin Space Website
 
-This directory contains the marketing website for ExciseMate, a distillery compliance software solution.
+Marketing website repository serving the ExciseMate product marketing page.
 
-## Contents
+## Live Site
 
-- `index.html` - Main landing page with hero section, features, benefits, pricing, and footer
+- Production: https://venin.space/excisemate
+- Repository: https://github.com/georgeatkinson-veninspace/venin-space-website
 
-## Design Features
+## Structure
 
-### Visual Design
-- Modern, professional design targeting the Australian distillery industry
-- Responsive mobile-first layout
-- Professional blue/gray color scheme with amber accents
-- Smooth animations and transitions
-- Self-contained single HTML file with inline CSS
+```
+venin-space-website/
+├── src/
+│   ├── app/
+│   │   ├── excisemate/          # ExciseMate marketing page
+│   │   │   ├── page.tsx         # Main marketing page
+│   │   │   ├── layout.tsx       # Layout wrapper
+│   │   │   ├── privacy/         # Privacy policy
+│   │   │   └── terms/           # Terms & conditions
+│   │   ├── layout.tsx           # Root layout (Inter font)
+│   │   ├── globals.css          # Global styles + Tailwind
+│   │   └── page.tsx             # Root redirects to /excisemate
+│   ├── components/
+│   │   ├── marketing/           # Marketing-specific components
+│   │   └── ui/                  # Reusable UI components (shadcn)
+│   ├── lib/
+│   │   └── utils.ts             # Utility functions (cn)
+│   └── styles/
+│       └── mobile.css           # Mobile-specific styles
+├── public/
+│   ├── logo.png                 # ExciseMate logo
+│   ├── logo-light.png           # Light variant
+│   ├── excisemate-logo.svg      # SVG logo
+│   ├── favicon.ico              # Site favicon
+│   └── icon-*.png               # PWA icons
+└── next.config.ts               # Next.js configuration
+```
 
-### Sections
-1. **Hero Section** - Compelling headline with 60-day free trial CTA
-2. **Features Section** - 4 key features (excise tracking, batch management, compliance reporting, multi-distillery)
-3. **Benefits Section** - Why distilleries choose ExciseMate
-4. **Pricing Section** - 60-day free trial information
-5. **Footer** - Links, contact, and legal information
+## Technology Stack
 
-### Performance
-- Fast loading with inline critical CSS
-- No external dependencies
-- Optimized for Core Web Vitals
-- Browser-native JavaScript for smooth scrolling
+- Next.js 15.5.4 (App Router)
+- React 19
+- TypeScript (strict mode)
+- Tailwind CSS 3.4.18
+- shadcn/ui components
+- Inter font (Google Fonts)
+
+## Development
+
+```bash
+npm install
+npm run dev    # http://localhost:3000 → redirects to /excisemate
+```
+
+## Features
+
+- ExciseMate product marketing page with:
+  - Hero section with ATO blue branding
+  - Feature showcase (6 key features)
+  - Benefits section
+  - Pricing tiers (Starter $99, Professional $199, Enterprise $499 AUD/month)
+  - CTA sections with 60-day free trial
+  - Privacy policy & Terms pages
 
 ## Deployment
 
-### Local Testing
-Simply open `index.html` in a web browser:
-```bash
-open marketing/index.html
-```
+- Automated via GitHub Actions
+- Docker containerized
+- Deployed to AWS EC2
+- Domain: venin.space
 
-Or use a local server:
-```bash
-cd marketing
-python3 -m http.server 8000
-# Visit http://localhost:8000
-```
+## Key Files
 
-### Production Deployment
-
-Deploy to AWS S3 and CloudFront:
-
-1. **Setup AWS Infrastructure** (one-time):
-   ```bash
-   ./scripts/aws-setup-infrastructure.sh
-   ```
-
-2. **Deploy Marketing Site**:
-   ```bash
-   ./scripts/deploy-marketing-site.sh
-   ```
-
-3. **Dry Run** (test without deploying):
-   ```bash
-   ./scripts/deploy-marketing-site.sh --dry-run
-   ```
-
-4. **Deploy without CloudFront invalidation**:
-   ```bash
-   ./scripts/deploy-marketing-site.sh --skip-cloudfront
-   ```
-
-## Customization
-
-### Brand Colors
-Update the CSS variables in the `<style>` section:
-```css
-:root {
-    --primary-blue: #1e40af;        /* Primary brand color */
-    --accent-amber: #f59e0b;        /* Accent color */
-    --gray-900: #111827;            /* Dark text */
-}
-```
-
-### Content Updates
-1. Replace placeholder text in the HTML
-2. Update contact information in the footer
-3. Add your ABN and contact details
-4. Update domain references from excisemate.com to your domain
-
-### Adding Images
-To add hero images or feature graphics:
-1. Place images in the `marketing/` directory
-2. Update `<img>` tags or CSS background-image properties
-3. Optimize images before deployment (use WebP format for best performance)
-
-## Browser Support
-
-- Chrome/Edge (latest 2 versions)
-- Firefox (latest 2 versions)
-- Safari (latest 2 versions)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## File Size
-
-- index.html: ~27 KB (uncompressed)
-- Loads in < 1 second on 3G networks
-- Perfect Lighthouse scores achievable
-
-## SEO Optimization
-
-The site includes:
-- Semantic HTML5 structure
-- Meta descriptions
-- Responsive design
-- Fast loading times
-- Accessible markup
-
-### Recommended Additions
-- Add favicon.ico
-- Add og:image and Twitter card meta tags
-- Add structured data (JSON-LD) for organization
-- Create sitemap.xml
-- Add robots.txt
-
-## Maintenance
-
-### Regular Updates
-- Review and update pricing information
-- Keep feature descriptions current
-- Update statistics and testimonials
-- Refresh call-to-action messaging
-
-### Performance Monitoring
-- Monitor Core Web Vitals
-- Test on real devices
-- Check mobile usability
-- Verify all links work
-
-## Legal Requirements
-
-Before going live, ensure you have:
-- Privacy Policy page
-- Terms of Service page
-- Cookie consent (if applicable)
-- ABN displayed
-- Contact information
-- GDPR compliance (if targeting EU)
-
-## Support
-
-For technical issues with the marketing site:
-- Check AWS CloudFront distribution status
-- Verify S3 bucket permissions
-- Test DNS configuration
-- Clear browser cache
-
-## License
-
-Copyright 2025 ExciseMate. All rights reserved.
+- `next.config.ts` - Redirects root to /excisemate, security headers
+- `tailwind.config.ts` - Tailwind v3 config with custom animations
+- `src/app/globals.css` - ATO blue CSS variables, custom fonts

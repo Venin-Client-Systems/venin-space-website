@@ -2,72 +2,247 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "tw-animate-css";
+@import "../styles/mobile.css";
+
+:root {
+  --radius: 0.625rem;
+
+  /* ATO Government Blue - Official Australian Government Colors */
+  --ato-blue: #00698f;                    /* Official ATO government blue */
+  --ato-dark-blue: #004d6b;               /* Darker shade for hover states */
+  --ato-light-blue: #e6f2f7;              /* Light blue for backgrounds */
+
+  /* Yacht Club - Premium Maritime Elegance */
+  --yacht-cream: oklch(0.95 0.005 65);    /* #F2F0EF - Warm cream canvas */
+  --yacht-gray: oklch(0.76 0.003 210);    /* #BBBDBC - Sophisticated gray */
+  --yacht-teal: oklch(0.41 0.06 220);     /* #245F73 - Deep ocean teal */
+  --yacht-brown: oklch(0.38 0.09 40);     /* #733E24 - Rich mahogany */
+
+  /* Base colors - Warm cream canvas with rich teal accents */
+  --background: oklch(0.96 0.005 65);
+  --foreground: oklch(0.25 0.03 230);
+  --card: oklch(0.98 0.003 65);
+  --card-foreground: oklch(0.25 0.03 230);
+  --popover: oklch(0.98 0.003 65);
+  --popover-foreground: oklch(0.25 0.03 230);
+
+  /* Primary - Deep ocean teal for authority and trust */
+  --primary: oklch(0.41 0.06 220);
+  --primary-foreground: oklch(0.98 0.003 65);
+
+  /* Secondary - Rich mahogany for warmth and luxury */
+  --secondary: oklch(0.38 0.09 40);
+  --secondary-foreground: oklch(0.98 0.003 65);
+
+  /* Muted tones - Sophisticated gray for subtle elements */
+  --muted: oklch(0.92 0.005 65);
+  --muted-foreground: oklch(0.55 0.02 220);
+
+  /* Accent - Lighter teal for interactive elements */
+  --accent: oklch(0.88 0.015 220);
+  --accent-foreground: oklch(0.35 0.06 220);
+
+  /* Status colors - Refined teal and brown variants */
+  --destructive: oklch(0.50 0.15 25);
+  --success: oklch(0.55 0.10 160);
+
+  /* Borders and inputs - Subtle gray for clean separation */
+  --border: oklch(0.82 0.008 210);
+  --input: oklch(0.94 0.005 65);
+  --ring: oklch(0.41 0.06 220);
+
+  /* Charts - Sophisticated maritime palette */
+  --chart-1: oklch(0.41 0.06 220);   /* Deep Teal */
+  --chart-2: oklch(0.38 0.09 40);    /* Rich Brown */
+  --chart-3: oklch(0.76 0.003 210);  /* Elegant Gray */
+  --chart-4: oklch(0.55 0.08 200);   /* Medium Teal */
+  --chart-5: oklch(0.88 0.015 220);  /* Light Teal */
+
+  /* Sidebar - Premium cream background with teal accents */
+  --sidebar: oklch(0.97 0.005 65);
+  --sidebar-foreground: oklch(0.25 0.03 230);
+  --sidebar-primary: oklch(0.41 0.06 220);
+  --sidebar-primary-foreground: oklch(0.98 0.003 65);
+  --sidebar-accent: oklch(0.92 0.008 220);
+  --sidebar-accent-foreground: oklch(0.35 0.06 220);
+  --sidebar-border: oklch(0.82 0.008 210);
+  --sidebar-ring: oklch(0.41 0.06 220);
+}
+
+.dark {
+  /* Dark Yacht Club - Sophisticated nautical night mode */
+  --background: oklch(0.18 0.015 230);
+  --foreground: oklch(0.95 0.005 65);
+  --card: oklch(0.22 0.02 230);
+  --card-foreground: oklch(0.95 0.005 65);
+  --popover: oklch(0.22 0.02 230);
+  --popover-foreground: oklch(0.95 0.005 65);
+  --primary: oklch(0.55 0.08 220);
+  --primary-foreground: oklch(0.95 0.005 65);
+  --secondary: oklch(0.48 0.12 40);
+  --secondary-foreground: oklch(0.95 0.005 65);
+  --muted: oklch(0.28 0.02 230);
+  --muted-foreground: oklch(0.70 0.02 220);
+  --accent: oklch(0.32 0.04 220);
+  --accent-foreground: oklch(0.88 0.015 220);
+  --destructive: oklch(0.60 0.18 25);
+  --border: oklch(0.35 0.03 220);
+  --input: oklch(0.25 0.02 230);
+  --ring: oklch(0.55 0.08 220);
+  --chart-1: oklch(0.55 0.08 220);
+  --chart-2: oklch(0.48 0.12 40);
+  --chart-3: oklch(0.68 0.04 210);
+  --chart-4: oklch(0.45 0.10 200);
+  --chart-5: oklch(0.75 0.06 220);
+  --sidebar: oklch(0.20 0.018 230);
+  --sidebar-foreground: oklch(0.95 0.005 65);
+  --sidebar-primary: oklch(0.55 0.08 220);
+  --sidebar-primary-foreground: oklch(0.95 0.005 65);
+  --sidebar-accent: oklch(0.28 0.03 220);
+  --sidebar-accent-foreground: oklch(0.88 0.015 220);
+  --sidebar-border: oklch(0.35 0.03 220);
+  --sidebar-ring: oklch(0.55 0.08 220);
+}
+
 @layer base {
-  :root {
-    --radius: 0.625rem;
-    --ato-blue: #00698f;
-    --ato-dark-blue: #004d6b;
-    --ato-light-blue: #e6f2f7;
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-@layer utilities {
-  .gradient-text {
-    @apply bg-gradient-to-r from-[var(--ato-blue)] to-[var(--ato-dark-blue)] bg-clip-text text-transparent;
+/* Premium Marketing Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
   }
-
-  /* Animation stagger delays */
-  .animate-stagger-1 { animation-delay: 0.1s; }
-  .animate-stagger-2 { animation-delay: 0.2s; }
-  .animate-stagger-3 { animation-delay: 0.3s; }
-  .animate-stagger-4 { animation-delay: 0.4s; }
-  .animate-stagger-5 { animation-delay: 0.5s; }
-  .animate-stagger-6 { animation-delay: 0.6s; }
-
-  /* Hover lift effect */
-  .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-html {
-  scroll-behavior: smooth;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger delays for grid items */
+.animate-stagger-1 {
+  animation-delay: 0.1s;
+}
+
+.animate-stagger-2 {
+  animation-delay: 0.2s;
+}
+
+.animate-stagger-3 {
+  animation-delay: 0.3s;
+}
+
+.animate-stagger-4 {
+  animation-delay: 0.4s;
+}
+
+.animate-stagger-5 {
+  animation-delay: 0.5s;
+}
+
+.animate-stagger-6 {
+  animation-delay: 0.6s;
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Gradient text animation */
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    var(--ato-blue) 0%,
+    var(--ato-dark-blue) 50%,
+    var(--ato-blue) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
 }
