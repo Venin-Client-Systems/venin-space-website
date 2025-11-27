@@ -1,28 +1,24 @@
 name: Deploy Venin Space Website
 
-# Independent CI/CD for venin.space investor landing page
-# Completely separate from ExciseMate infrastructure
+# Simple deployment for venin.space
+# Builds locally and copies to FlowVPS
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Reason for manual deployment'
-        required: false
-        type: string
 
 env:
-  AWS_REGION: ap-southeast-2
-  ECR_REPOSITORY: venin-space
   EC2_HOST: ubuntu@15.134.147.34
 
 jobs:
-  build-check:
-    name: Build Check
+  deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://venin.space
 
     steps:
       - name: Checkout code
@@ -38,116 +34,60 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: |
-          npm run build
-          echo "✅ Site builds successfully"
+        run: npm run build
 
-  build-and-push:
-    name: Build Docker Image
-    needs: build-check
-    runs-on: ubuntu-latest
-
-    outputs:
-      image-tag: ${{ steps.build-image.outputs.image-tag }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push Docker image
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build --no-cache -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-          echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo "✅ Pushed image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-
-  deploy:
-    name: Deploy to FlowVPS
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://venin.space
-
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Deploy to EC2
+      - name: Deploy to FlowVPS
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
-          echo "$SSH_PRIVATE_KEY" > /tmp/ec2_key.pem
-          chmod 400 /tmp/ec2_key.pem
+          echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key.pem
+          chmod 400 /tmp/ssh_key.pem
 
-          cat > /tmp/deploy.sh << 'DEPLOY_SCRIPT_EOF'
+          # Create deployment directory
+          ssh -i /tmp/ssh_key.pem -o StrictHostKeyChecking=no $EC2_HOST 'sudo mkdir -p /var/www/venin.space && sudo chown ubuntu:ubuntu /var/www/venin.space'
+
+          # Copy standalone build
+          rsync -avz --delete -e "ssh -i /tmp/ssh_key.pem -o StrictHostKeyChecking=no" \
+            .next/standalone/ $EC2_HOST:/var/www/venin.space/
+
+          # Copy static assets
+          rsync -avz -e "ssh -i /tmp/ssh_key.pem -o StrictHostKeyChecking=no" \
+            .next/static/ $EC2_HOST:/var/www/venin.space/.next/static/
+
+          # Copy public folder if exists
+          if [ -d "public" ]; then
+            rsync -avz -e "ssh -i /tmp/ssh_key.pem -o StrictHostKeyChecking=no" \
+              public/ $EC2_HOST:/var/www/venin.space/public/
+          fi
+
+          # Restart the service
+          ssh -i /tmp/ssh_key.pem -o StrictHostKeyChecking=no $EC2_HOST << 'DEPLOY_EOF'
           set -e
+          cd /var/www/venin.space
 
-          echo "🚀 Deploying venin.space..."
+          # Stop existing process if running
+          sudo pkill -f "node.*venin.space/server.js" || true
 
-          echo "🔐 Logging into ECR..."
-          sudo aws ecr get-login-password --region ap-southeast-2 | \
-            sudo docker login --username AWS --password-stdin \
-            435929994112.dkr.ecr.ap-southeast-2.amazonaws.com
+          # Start with PM2 or simple nohup
+          if command -v pm2 &> /dev/null; then
+            pm2 delete venin-space 2>/dev/null || true
+            PORT=3002 pm2 start server.js --name venin-space
+          else
+            PORT=3002 nohup node server.js > /var/log/venin-space.log 2>&1 &
+          fi
 
-          echo "📦 Pulling latest image..."
-          sudo docker pull 435929994112.dkr.ecr.ap-southeast-2.amazonaws.com/venin-space:latest
+          sleep 3
 
-          echo "🧹 Stopping old container..."
-          sudo docker stop venin-space 2>/dev/null || true
-          sudo docker rm venin-space 2>/dev/null || true
+          # Health check
+          if curl -sf http://localhost:3002 > /dev/null; then
+            echo "✅ venin.space deployed successfully!"
+          else
+            echo "❌ Health check failed"
+            exit 1
+          fi
+          DEPLOY_EOF
 
-          echo "🚀 Starting container on port 3002..."
-          sudo docker run -d \
-            --name venin-space \
-            --restart unless-stopped \
-            -p 3002:3000 \
-            435929994112.dkr.ecr.ap-southeast-2.amazonaws.com/venin-space:latest
-
-          echo "⏳ Waiting for container..."
-          sleep 5
-
-          # Health check - just verify the page loads
-          for i in {1..10}; do
-            if curl -sf http://localhost:3002 > /dev/null 2>&1; then
-              echo "✅ Deployment successful!"
-              exit 0
-            fi
-            echo "Attempt $i/10..."
-            sleep 2
-          done
-
-          echo "❌ Health check failed"
-          sudo docker logs --tail=30 venin-space
-          exit 1
-          DEPLOY_SCRIPT_EOF
-
-          ssh -i /tmp/ec2_key.pem -o StrictHostKeyChecking=no ${{ env.EC2_HOST }} 'bash -s' < /tmp/deploy.sh
-          rm -f /tmp/ec2_key.pem /tmp/deploy.sh
+          rm -f /tmp/ssh_key.pem
 
       - name: Verify deployment
         run: |
@@ -158,13 +98,3 @@ jobs:
           else
             echo "⚠️ HTTP $response - may need nginx config"
           fi
-
-      - name: Rollback on failure
-        if: failure()
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" > /tmp/ec2_key.pem
-          chmod 400 /tmp/ec2_key.pem
-          ssh -i /tmp/ec2_key.pem -o StrictHostKeyChecking=no ${{ env.EC2_HOST }} 'sudo docker restart venin-space || true'
-          rm -f /tmp/ec2_key.pem
