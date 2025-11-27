@@ -1,8 +1,7 @@
 name: Deploy Venin Space Website
 
-# Lightweight CI/CD for Venin Space marketing website
-# This is a public-facing marketing page
-# Testing is minimal - just ensure no fatal errors
+# Independent CI/CD for venin.space investor landing page
+# Completely separate from ExciseMate infrastructure
 
 on:
   push:
@@ -17,14 +16,12 @@ on:
 
 env:
   AWS_REGION: ap-southeast-2
-  ECR_REPOSITORY: excisemate
-  EC2_INSTANCE_ID: i-07f10e0bb90536104
+  ECR_REPOSITORY: venin-space
   EC2_HOST: ubuntu@15.134.147.34
 
 jobs:
-  # Minimal check - just ensure it compiles
-  quick-check:
-    name: Build Check Only
+  build-check:
+    name: Build Check
     runs-on: ubuntu-latest
 
     steps:
@@ -40,15 +37,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (ensure no fatal errors)
+      - name: Build
         run: |
           npm run build
-          echo "✅ Marketing site builds successfully"
+          echo "✅ Site builds successfully"
 
-  # Build and push Docker image
   build-and-push:
     name: Build Docker Image
-    needs: quick-check
+    needs: build-check
     runs-on: ubuntu-latest
 
     outputs:
@@ -73,27 +69,24 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: marketing-${{ github.sha }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Build Docker image with NO CACHE to ensure fresh build
           docker build --no-cache -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:marketing-latest
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-          # Push to ECR
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:marketing-latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
           echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo "✅ Pushed marketing image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "✅ Pushed image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-  # Deploy to production (marketing changes only affect /excisemate route)
   deploy:
-    name: Deploy Marketing to Production
+    name: Deploy to FlowVPS
     needs: build-and-push
     runs-on: ubuntu-latest
     environment:
-      name: marketing
-      url: https://excisemate.venin.space/excisemate
+      name: production
+      url: https://venin.space
 
     steps:
       - name: Configure AWS credentials
@@ -108,77 +101,62 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
-          # Save SSH key
           echo "$SSH_PRIVATE_KEY" > /tmp/ec2_key.pem
           chmod 400 /tmp/ec2_key.pem
 
-          # Create deployment script
-          cat > /tmp/deploy-marketing.sh << 'DEPLOY_SCRIPT_EOF'
+          cat > /tmp/deploy.sh << 'DEPLOY_SCRIPT_EOF'
           set -e
 
-          echo "🎨 Deploying marketing site (separate container)..."
+          echo "🚀 Deploying venin.space..."
 
           echo "🔐 Logging into ECR..."
           sudo aws ecr get-login-password --region ap-southeast-2 | \
             sudo docker login --username AWS --password-stdin \
             435929994112.dkr.ecr.ap-southeast-2.amazonaws.com
 
-          echo "📦 Pulling latest marketing image..."
-          sudo docker pull 435929994112.dkr.ecr.ap-southeast-2.amazonaws.com/excisemate:marketing-latest
+          echo "📦 Pulling latest image..."
+          sudo docker pull 435929994112.dkr.ecr.ap-southeast-2.amazonaws.com/venin-space:latest
 
-          echo "🧹 Stopping and removing old marketing container..."
-          sudo docker stop excisemate-marketing 2>/dev/null || true
-          sudo docker rm excisemate-marketing 2>/dev/null || true
+          echo "🧹 Stopping old container..."
+          sudo docker stop venin-space 2>/dev/null || true
+          sudo docker rm venin-space 2>/dev/null || true
 
-          echo "🚀 Starting NEW marketing container on port 3001..."
-          cd /opt/excisemate
+          echo "🚀 Starting container on port 3002..."
           sudo docker run -d \
-            --name excisemate-marketing \
+            --name venin-space \
             --restart unless-stopped \
-            -p 3001:3000 \
-            --env-file .env \
-            435929994112.dkr.ecr.ap-southeast-2.amazonaws.com/excisemate:marketing-latest
+            -p 3002:3000 \
+            435929994112.dkr.ecr.ap-southeast-2.amazonaws.com/venin-space:latest
 
-          echo "⏳ Waiting for container to be healthy..."
-          sleep 10
+          echo "⏳ Waiting for container..."
+          sleep 5
 
-          # Health check on port 3001 (marketing container)
-          for i in {1..15}; do
-            if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
-              echo "✅ Marketing deployment successful!"
-              echo "📍 Marketing site running on port 3001"
-              echo "🌐 Access via: https://venin.space/excisemate"
+          # Health check - just verify the page loads
+          for i in {1..10}; do
+            if curl -sf http://localhost:3002 > /dev/null 2>&1; then
+              echo "✅ Deployment successful!"
               exit 0
             fi
-            echo "Attempt $i/15..."
+            echo "Attempt $i/10..."
             sleep 2
           done
 
-          echo "❌ Health check failed after marketing deployment"
-          sudo docker logs --tail=50 excisemate-marketing
+          echo "❌ Health check failed"
+          sudo docker logs --tail=30 venin-space
           exit 1
           DEPLOY_SCRIPT_EOF
 
-          # Deploy to EC2
-          ssh -i /tmp/ec2_key.pem -o StrictHostKeyChecking=no ${{ env.EC2_HOST }} 'bash -s' < /tmp/deploy-marketing.sh
+          ssh -i /tmp/ec2_key.pem -o StrictHostKeyChecking=no ${{ env.EC2_HOST }} 'bash -s' < /tmp/deploy.sh
+          rm -f /tmp/ec2_key.pem /tmp/deploy.sh
 
-          # Cleanup
-          rm -f /tmp/ec2_key.pem /tmp/deploy-marketing.sh
-
-      - name: Verify marketing page
+      - name: Verify deployment
         run: |
-          echo "🔍 Verifying marketing page deployment..."
           sleep 5
-
-          # Test marketing page endpoint (now on venin.space, not excisemate.venin.space)
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://venin.space/excisemate)
-
-          if [ $response -eq 200 ]; then
-            echo "✅ Marketing page is live! (HTTP $response)"
-            echo "🌐 View at: https://venin.space/excisemate"
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://venin.space || echo "000")
+          if [ "$response" = "200" ]; then
+            echo "✅ venin.space is live!"
           else
-            echo "⚠️ Marketing page returned HTTP $response (may need manual check)"
-            echo "🌐 URL: https://venin.space/excisemate"
+            echo "⚠️ HTTP $response - may need nginx config"
           fi
 
       - name: Rollback on failure
@@ -186,34 +164,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         run: |
-          echo "🔄 Rolling back marketing changes..."
-
           echo "$SSH_PRIVATE_KEY" > /tmp/ec2_key.pem
           chmod 400 /tmp/ec2_key.pem
-
-          cat > /tmp/rollback-marketing.sh << 'ROLLBACK_SCRIPT_EOF'
-          echo "Restarting marketing container with previous image..."
-          sudo docker restart excisemate-marketing || true
-          ROLLBACK_SCRIPT_EOF
-
-          ssh -i /tmp/ec2_key.pem -o StrictHostKeyChecking=no ${{ env.EC2_HOST }} 'bash -s' < /tmp/rollback-marketing.sh
-
-          rm -f /tmp/ec2_key.pem /tmp/rollback-marketing.sh
-
-  notify:
-    name: Deployment Notification
-    needs: [quick-check, build-and-push, deploy]
-    runs-on: ubuntu-latest
-    if: always()
-
-    steps:
-      - name: Marketing Deployment Status
-        run: |
-          if [ "${{ needs.deploy.result }}" == "success" ]; then
-            echo "✅ Venin Space website deployed successfully!"
-            echo "🌐 Live at: https://venin.space/excisemate"
-            echo "📝 Repository: venin-space-website"
-          else
-            echo "❌ Website deployment failed!"
-            echo "🔍 Check logs above for details"
-          fi
+          ssh -i /tmp/ec2_key.pem -o StrictHostKeyChecking=no ${{ env.EC2_HOST }} 'sudo docker restart venin-space || true'
+          rm -f /tmp/ec2_key.pem
