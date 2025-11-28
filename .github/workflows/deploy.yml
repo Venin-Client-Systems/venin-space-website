@@ -78,19 +78,16 @@ jobs:
 
           cd /var/www/venin.space
 
-          # Stop existing process if running
-          pkill -f "node.*venin.space/server.js" || true
+          # Force stop any existing process
+          pm2 delete venin-space 2>/dev/null || true
+          pkill -f "server.js" 2>/dev/null || true
+          sleep 2
 
-          # Start with PM2 or simple nohup
-          if command -v pm2 &> /dev/null; then
-            pm2 delete venin-space 2>/dev/null || true
-            PORT=3003 pm2 start server.js --name venin-space
-            pm2 save
-          else
-            PORT=3003 nohup node server.js > /var/log/venin-space.log 2>&1 &
-          fi
+          # Start with PM2
+          PORT=3003 pm2 start server.js --name venin-space --update-env
+          pm2 save
 
-          sleep 3
+          sleep 5
 
           # Health check
           if curl -sf http://localhost:3003 > /dev/null; then
